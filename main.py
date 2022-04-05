@@ -1,8 +1,9 @@
 import os
 import easygui
 import json
-import ast
 import subprocess
+
+mediaPlayerPath = "Your path to media player "
 
 def startUpdateMedia(property,media):
     for item in media:
@@ -52,5 +53,5 @@ findDict = next((item for item in media if item["path"] == name), None)
 print(findDict)
 startUpdateMedia(findDict,media)
 file = findDict["path"]
-subprocess.Popen(["C:/Program Files/VideoLAN/VLC/vlc.exe",f"{path}/{file}"])
+subprocess.Popen([mediaPlayerPath,f"{path}/{file}"])
 
