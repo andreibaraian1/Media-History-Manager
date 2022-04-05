@@ -1,14 +1,13 @@
 import os
-import vlc
 import easygui
 import json
 import ast
+import subprocess
 
 def startUpdateMedia(property,media):
-    result = ast.literal_eval(property)
     for item in media:
-        if item["path"] == result["path"]:
-            item["status"]='STARTED'
+        if item["path"] == property["path"]:
+            item["status"]='OPENED'
             break
     else:
         item = None
@@ -17,21 +16,20 @@ def startUpdateMedia(property,media):
         createFile.write(json.dumps(media))
         createFile.close()
 
-
-
 def getConfig(path):
     media = []
     for file in os.listdir(path):
         if file.endswith((".mkv",".mp4")):
-             media.append({"path":file, "status": "NOT_STARTED"})
+             media.append({"path":file, "status": "NOT_OPENED"})
         if(not os.path.exists(f"{path}/config.txt")):
             createFile=open(f"{path}/config.txt","w")
             createFile.write(json.dumps(media))
             createFile.close()
         readFile=open(f"{path}/config.txt","r")
         prevMedia = json.loads(readFile.read())
+    list_names = [value for item in prevMedia for value in item.values()]
     for item in media:
-        if(item not in prevMedia):
+        if(item["path"] not in list_names):
             prevMedia.append(item)
             createFile=open(f"{path}/config.txt","w")
             createFile.write(json.dumps(media))
@@ -42,18 +40,17 @@ path=easygui.diropenbox(msg="Choose a file")
 files = os.listdir(path)
 media = getConfig(path)
 msg="Select the media to play"
-reply=easygui.choicebox(msg,choices=media)
-startUpdateMedia(reply,media)
+choices = []
+for item in media:
+    status=item["status"]
+    name=item["path"]
+    choices.append(f"Status : {status} Name:{name}")
 
+reply=easygui.choicebox(msg,choices=choices)
+name = (reply.split("Name:",1)[1])
+findDict = next((item for item in media if item["path"] == name), None)
+print(findDict)
+startUpdateMedia(findDict,media)
+file = findDict["path"]
+subprocess.Popen(["C:/Program Files/VideoLAN/VLC/vlc.exe",f"{path}/{file}"])
 
-
-# media_player = vlc.MediaPlayer()
-  
-
-# media = vlc.Media("test.mkv")
-  
-
-# media_player.set_media(media)
-  
-
-# media_player.play()
